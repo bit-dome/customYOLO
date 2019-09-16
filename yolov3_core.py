@@ -8,7 +8,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import *
 
-from yolov3_tools.model import yolo_eval, yolo_body, MoblrNet_body
+from yolov3_tools.model import yolo_eval, MoblrNet_body
 from yolov3_tools.utils import letterbox_image
 
 from tensorflow.keras.utils import multi_gpu_model
@@ -21,12 +21,12 @@ os.chdir(sys.path[0])
 
 class YOLO(object):
     _defaults = {
-        "model_path": 'g1-06.h5',
+        "model_path": 'g1-04.h5',
         "anchors_path": 'model_data/yolo_anchors.txt',
         "classes_path": 'model_data/classes.txt',
         "score" : 0.3,
         "iou" : 0.1,
-        "model_image_size" : (416, 416),
+        "input_shape" : (256, 128),
         "gpu_num" : 1,
         "test":False
     }
@@ -68,7 +68,7 @@ class YOLO(object):
         num_anchors = len(self.anchors)
         num_classes = len(self.class_names)   
       
-        self.yolo_model = MoblrNet_body(Input(shape=(416,416,3)), num_anchors//2, num_classes)
+        self.yolo_model = MoblrNet_body((self.input_shape[0],self.input_shape[1],3), num_anchors//2, num_classes)
         self.yolo_model.load_weights(self.model_path)
       
 
@@ -93,7 +93,7 @@ class YOLO(object):
     def detect_image(self, image,filename='',boxes_only=False):
         
        
-        boxed_image = letterbox_image(image, tuple(reversed(self.model_image_size)))       
+        boxed_image = cv2.resize(image,(128,256))#letterbox_image(image, tuple(reversed(self.input_shape)))       
         image_data = np.array(boxed_image, dtype='float32')        
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0) 
