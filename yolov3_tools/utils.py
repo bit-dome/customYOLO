@@ -16,21 +16,23 @@ def compose(*funcs):
     else:
         raise ValueError('Composition of empty sequence not supported.')
 
-def letterbox_image(image, size):
+def letterbox_image(image, input_layer_size):
     '''resize image with unchanged aspect ratio using padding'''
     ih,iw,_ = image.shape
-    w, h = size
+    h,w = input_layer_size
     scale = min(w/iw, h/ih)
     nw = int(iw*scale)
     nh = int(ih*scale)
 
     image = cv2.resize(image,(nw,nh), interpolation = cv2.INTER_CUBIC)
 
-    new_image = np.ones((w,h,3),dtype=np.uint8)*128
+    new_image = np.ones((h,w,3),dtype=np.uint8)*128
 
     border_h = (h-nh)//2
     border_w = (w-nw)//2
     new_image[border_h:border_h+nh,border_w:border_w+nw,:]=image
+    
+    cv2.imwrite("tmp.jpg",new_image)
 
     return new_image
 
